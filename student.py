@@ -1,49 +1,36 @@
-import unittest
-from student import Student
+from datetime import date, timedelta
+import requests
 
 
-class TestStudent(unittest.TestCase):
-    
-    @classmethod
-    def setUpClass(cls):
-        print("set up class")
+class Student:
+    """ A Student class as a basis for method testing """
 
-    def setUp(self):
-        print("setup")
-        self.student = Student("John", "Doe")
+    def __init__(self, first_name, last_name):
+        self._first_name = first_name
+        self._last_name = last_name
+        self._start_date = date.today()
+        self.end_date = date.today() + timedelta(days=365)
+        self.naughty_list = False
 
-    @classmethod
-    def tearDownClass(cls):
-        print("tear down Class")
+    @property
+    def full_name(self):
+        return f"{self._first_name} {self._last_name}"
 
-    def tearDown(self):
-        print("tear down")
+    @property
+    def email(self):
+        return f"{self._first_name.lower()}.{self._last_name.lower()}@email.com"
 
-    def test_full_name(self):
-        print("test_full_name")
-        self.assertEqual(self.student.full_name, "John Doe")
+    def alert_santa(self):
+        self.naughty_list = True
 
-    def test_alert_santa(self):
-        print("test_alert_santa")
-        self.student.alert_santa()
-        self.assertTrue(self.student.naughty_list)
+    def apply_extension(self, days):
+        self.end_date += timedelta(days=days)
 
-    def test_email(self):
-        print("test_email")
-        self.assertEqual(self.student.email, "john.doe@email.com")
+    def course_schedule(self):
+        response = requests.get(
+            f"https://company.com/course-schedule/{self._last_name}/{self._first_name}")
 
-    def test_apply_extension(self):
-        old_end_date = self.student.end_date
-        self.student.apply_extension(5)
-        self.assertEqual(self.student.end_date, old_end_date + timedelta(days=5))
-        """
-        The method below is also great!  But keep in mid that  it will
-        only be correct if a student has received 1 extenstion.  If 
-        they receive a second - it would return false
-
-        self.student.apply_extension(5)
-        self.assertEqual(self.student.end_date, self.student._start_date + timedelta(days=370))
-        """
-
-if __name__ == "__main__":
-    unittest.main()
+        if response.ok:
+            return response.text
+        else:
+            return "Something went wrong"
